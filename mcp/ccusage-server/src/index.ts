@@ -26,17 +26,52 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: "run_ccusage",
-        description: "Run 'npx ccusage@latest' command to analyze code usage",
+        description: "Run ccusage command to analyze code usage",
         inputSchema: {
           type: "object",
           properties: {
-            args: {
-              type: "array",
-              items: {
-                type: "string",
-              },
-              description: "Additional arguments to pass to ccusage",
-              default: [],
+            command: {
+              type: "string",
+              description: "ccusage command type",
+              enum: ["daily", "monthly", "session", "blocks"],
+              default: "daily",
+            },
+            since: {
+              type: "string",
+              description: "Start date filter (YYYYMMDD format)",
+            },
+            until: {
+              type: "string",
+              description: "End date filter (YYYYMMDD format)",
+            },
+            project: {
+              type: "string",
+              description: "Filter by specific project",
+            },
+            json: {
+              type: "boolean",
+              description: "Output in JSON format",
+              default: false,
+            },
+            breakdown: {
+              type: "boolean",
+              description: "Show per-model cost breakdown",
+              default: false,
+            },
+            instances: {
+              type: "boolean",
+              description: "Group by project/instance",
+              default: false,
+            },
+            live: {
+              type: "boolean",
+              description: "Real-time usage dashboard (only for blocks command)",
+              default: false,
+            },
+            offline: {
+              type: "boolean",
+              description: "Use offline mode",
+              default: false,
             },
           },
         },
@@ -53,7 +88,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     );
   }
 
-  const args = (request.params.arguments?.args as string[]) || [];
+  const params = request.params.arguments as any || {};
+  const command = params.command || "daily";
+  const args: string[] = [command];
+
+  if (params.since) args.push("--since", params.since as string);
+  if (params.until) args.push("--until", params.until as string);
+  if (params.project) args.push("--project", params.project as string);
+  if (params.json) args.push("--json");
+  if (params.breakdown) args.push("--breakdown");
+  if (params.instances) args.push("--instances");
+  if (params.live && command === "blocks") args.push("--live");
+  if (params.offline) args.push("--offline");
 
   return new Promise((resolve, reject) => {
     let output = "";

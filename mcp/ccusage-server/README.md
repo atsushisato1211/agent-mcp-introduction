@@ -1,22 +1,44 @@
 # CCUsage MCP Server
 
-This MCP server runs `npx ccusage@latest` to analyze code usage.
+このMCPサーバーは `ccusage` コマンドを実行してClaude Codeの使用量を分析するためのツールです。
 
-## Installation
+## 機能
+
+- Claude Codeの使用量とコストを分析
+- 日次、月次、セッション単位での使用量レポート
+- モデル別のコスト内訳表示
+- リアルタイム使用量ダッシュボード
+
+## インストール
 
 ```bash
 npm install
 npm run build
 ```
 
-## Usage
+## 設定方法
 
-Configure this server in your MCP client (like Claude Desktop) by adding it to the MCP configuration:
+### Claude Code での設定
+
+Claude Codeでこのサーバーを使用するには、以下のコマンドを実行してください：
+
+```bash
+claude mcp add ccusage-server -s user -- npx tsx /path/to/mcp/ccusage-server/src/index.ts
+```
+
+実際のパス例：
+```bash
+claude mcp add ccusage-server -s user -- npx tsx /Users/atsushi.sato/Workspace/agent-mcp-introduction/mcp/ccusage-server/src/index.ts
+```
+
+### Claude Desktop での設定
+
+Claude Desktopで使用する場合は、MCP設定にサーバーを追加してください：
 
 ```json
 {
   "mcpServers": {
-    "ccusage": {
+    "ccusage-server": {
       "command": "node",
       "args": ["/path/to/ccusage-server/dist/index.js"]
     }
@@ -24,10 +46,16 @@ Configure this server in your MCP client (like Claude Desktop) by adding it to t
 }
 ```
 
-## Available Tools
+## 利用可能なツール
 
-- `run_ccusage`: Runs `npx ccusage@latest` with optional arguments
-  - `args`: Array of additional arguments to pass to ccusage
+- `run_ccusage`: ccusageコマンドを実行して使用量を分析
+  - `command`: 実行するコマンド（daily, monthly, session, blocks）
+  - `breakdown`: モデル別コスト内訳を表示
+  - `instances`: プロジェクト/インスタンス別にグループ化
+  - `json`: JSON形式で出力
+  - `project`: 特定のプロジェクトでフィルタ
+  - `since`: 開始日フィルタ（YYYYMMDD形式）
+  - `until`: 終了日フィルタ（YYYYMMDD形式）
 
 ## Development
 
