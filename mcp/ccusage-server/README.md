@@ -39,8 +39,8 @@ Claude Desktopで使用する場合は、MCP設定にサーバーを追加して
 {
   "mcpServers": {
     "ccusage-server": {
-      "command": "node",
-      "args": ["/path/to/ccusage-server/dist/index.js"]
+      "command": "npx",
+      "args": ["tsx", "/path/to/ccusage-server/src/index.ts"]
     }
   }
 }
