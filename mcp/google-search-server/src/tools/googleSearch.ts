@@ -12,26 +12,9 @@ export interface GoogleSearchResult {
 }
 
 export function createGoogleSearchAI(): GoogleGenAI {
-  const provider = process.env.GEMINI_PROVIDER;
-  
-  if (provider === 'vertex') {
-    const projectId = process.env.VERTEX_PROJECT_ID;
-    const location = process.env.VERTEX_LOCATION || 'us-central1';
-    
-    if (!projectId) {
-      throw new Error('VERTEX_PROJECT_ID environment variable is required when using Vertex AI');
-    }
-    
-    return new GoogleGenAI({ 
-      vertexai: true,
-      project: projectId,
-      location
-    });
-  }
-  
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY environment variable is required when using Google AI Studio');
+    throw new Error('GEMINI_API_KEY environment variable is required');
   }
   
   return new GoogleGenAI({ apiKey });
