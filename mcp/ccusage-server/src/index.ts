@@ -12,7 +12,7 @@ import { spawn } from "child_process";
 const server = new Server(
   {
     name: "ccusage-server",
-    version: "1.0.0",
+    version: "1.1.0",
   },
   {
     capabilities: {
@@ -105,7 +105,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     let output = "";
     let errorOutput = "";
 
-    const ccusageProcess = spawn("npx", ["ccusage@latest", ...args], {
+    const ccusageProcess = spawn("bunx", ["ccusage", ...args], {
       shell: true,
       cwd: process.cwd(),
     });

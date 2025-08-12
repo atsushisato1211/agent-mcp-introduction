@@ -7,7 +7,7 @@ const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
 const child_process_1 = require("child_process");
 const server = new index_js_1.Server({
     name: "ccusage-server",
-    version: "1.0.0",
+    version: "1.1.0",
 }, {
     capabilities: {
         tools: {},
@@ -18,17 +18,52 @@ server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => {
         tools: [
             {
                 name: "run_ccusage",
-                description: "Run 'npx ccusage@latest' command to analyze code usage",
+                description: "Run ccusage command to analyze code usage",
                 inputSchema: {
                     type: "object",
                     properties: {
-                        args: {
-                            type: "array",
-                            items: {
-                                type: "string",
-                            },
-                            description: "Additional arguments to pass to ccusage",
-                            default: [],
+                        command: {
+                            type: "string",
+                            description: "ccusage command type",
+                            enum: ["daily", "monthly", "session", "blocks"],
+                            default: "daily",
+                        },
+                        since: {
+                            type: "string",
+                            description: "Start date filter (YYYYMMDD format)",
+                        },
+                        until: {
+                            type: "string",
+                            description: "End date filter (YYYYMMDD format)",
+                        },
+                        project: {
+                            type: "string",
+                            description: "Filter by specific project",
+                        },
+                        json: {
+                            type: "boolean",
+                            description: "Output in JSON format",
+                            default: false,
+                        },
+                        breakdown: {
+                            type: "boolean",
+                            description: "Show per-model cost breakdown",
+                            default: false,
+                        },
+                        instances: {
+                            type: "boolean",
+                            description: "Group by project/instance",
+                            default: false,
+                        },
+                        live: {
+                            type: "boolean",
+                            description: "Real-time usage dashboard (only for blocks command)",
+                            default: false,
+                        },
+                        offline: {
+                            type: "boolean",
+                            description: "Use offline mode",
+                            default: false,
                         },
                     },
                 },
@@ -40,11 +75,29 @@ server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
     if (request.params.name !== "run_ccusage") {
         throw new types_js_1.McpError(types_js_1.ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
     }
-    const args = request.params.arguments?.args || [];
+    const params = request.params.arguments || {};
+    const command = params.command || "daily";
+    const args = [command];
+    if (params.since)
+        args.push("--since", params.since);
+    if (params.until)
+        args.push("--until", params.until);
+    if (params.project)
+        args.push("--project", params.project);
+    if (params.json)
+        args.push("--json");
+    if (params.breakdown)
+        args.push("--breakdown");
+    if (params.instances)
+        args.push("--instances");
+    if (params.live && command === "blocks")
+        args.push("--live");
+    if (params.offline)
+        args.push("--offline");
     return new Promise((resolve, reject) => {
         let output = "";
         let errorOutput = "";
-        const ccusageProcess = (0, child_process_1.spawn)("npx", ["ccusage@latest", ...args], {
+        const ccusageProcess = (0, child_process_1.spawn)("bunx", ["ccusage", ...args], {
             shell: true,
             cwd: process.cwd(),
         });
